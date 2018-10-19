@@ -30,10 +30,12 @@ abstract class TaskManager<T> {
     abstract execute(task: Task<T>): any;
 
     public addTaskCallback(task: Task<T>, handler: Handler<T>) {
-        const value = this.cacheManager.get(task.key);
-        if (value) {
-            handler(value);
-            return;
+        if (this.cacheManager) {
+            const value = this.cacheManager.get(task.key);
+            if (value) {
+                handler(value);
+                return;
+            }
         }
         this.addTaskAndHandler(task, handler);
         this.runTask();
@@ -70,7 +72,9 @@ abstract class TaskManager<T> {
 
         try {
             const value = await this.execute(task);
-            this.cacheManager.set(task.key, value);
+            if (this.cacheManager) {
+                this.cacheManager.set(task.key, value);
+            }
             const handlers = this.handlerMap.get(task.key);
             handlers!.forEach((handler) => handler(value));
         } catch (e) {
