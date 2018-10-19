@@ -91,4 +91,11 @@ describe('TaskManager Test', () => {
         }).should.eventually.equal(Math.round(TASK_DURATION * 2 / 100));
     })
 
+    it('test taskmanager fifo', () => {
+        var results = [];
+        for (var i = 0; i < 10; i++) {
+            results.push(i * i);
+        }
+        return Promise.all(makeTasks(1, 10)).should.eventually.deep.equal(results);
+    });
 });
