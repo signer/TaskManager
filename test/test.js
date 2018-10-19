@@ -1,17 +1,17 @@
 var chai = require('chai');
 var chaiAsPromised = require("chai-as-promised");
-var { TaskManager, Task } = require('../dist/index.js');
+var { default: TaskManager } = require('../dist/TaskManager.js');
+
 chai.use(chaiAsPromised);
 chai.should();
 
 describe('TaskManager Test', () => {
-    class SquareTask extends Task {
+    class SquareTask {
         constructor(num) {
-            super();
             this.num = num;
         }
 
-        get key() {
+        get hash() {
             return '' + this.num;
         }        
     }

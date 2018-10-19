@@ -1,7 +1,7 @@
 var path = require('path');
 
 module.exports = {
-    entry: './lib/index.ts',
+    entry: './lib/TaskManager.ts',
     module: {
         rules: [
             {
@@ -17,7 +17,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'index.js',
+        filename: 'TaskManager.js',
         library: 'TaskManager',
         libraryTarget: 'umd',
         globalObject: 'typeof self !== \'undefined\' ? self : this',

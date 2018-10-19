@@ -1,21 +1,25 @@
-import Task from './Task';
-import CacheManager from './CacheManager';
+// import Task from './Task';
+import CacheStorage from './CacheStorage';
 
 type Handler<T> = (value?: T, error?: Error) => void;
 type Handlers<T> = Array<Handler<T>>;
 
-interface ICacheManager<T> {
+interface ICacheStorage<T> {
     set(key: string, value: T): void;
     get(key: string): T | null;
 }
 
+interface Task {
+    hash: string;
+};
+
 abstract class TaskManager<T> {
-    private taskList: Array<Task<T>> = [];
+    private taskList: Array<Task> = [];
     private workingCount = 0;
     private handlerMap = new Map<string, Handlers<T>>();
 
-    constructor(public concurrentCapacity = 5, public cacheManager: ICacheManager<T> = new CacheManager<T>()) {}
-    public addTask(task: Task<T>): Promise<T> {
+    constructor(private concurrentCapacity = 5, private cacheStorage: ICacheStorage<T> = new CacheStorage<T>()) {}
+    public addTask(task: Task): Promise<T> {
         return new Promise((resolve, reject) => {
             this.addTaskCallback(task, (value, error) => {
                 if (error) {
@@ -27,11 +31,11 @@ abstract class TaskManager<T> {
         });
     }
 
-    abstract execute(task: Task<T>): any;
+    abstract execute(task: Task): Promise<T>;
 
-    public addTaskCallback(task: Task<T>, handler: Handler<T>) {
-        if (this.cacheManager) {
-            const value = this.cacheManager.get(task.key);
+    public addTaskCallback(task: Task, handler: Handler<T>) {
+        if (this.cacheStorage) {
+            const value = this.cacheStorage.get(task.hash);
             if (value) {
                 handler(value);
                 return;
@@ -41,21 +45,21 @@ abstract class TaskManager<T> {
         this.runTask();
     }
 
-    private addTaskAndHandler(task: Task<T>, handler: Handler<T>) {
+    private addTaskAndHandler(task: Task, handler: Handler<T>) {
         this.pushTask(task);
-        let handlers = this.handlerMap.get(task.key);
+        let handlers = this.handlerMap.get(task.hash);
         if (!handlers) {
             handlers = [];
         }
         handlers.push(handler);
-        this.handlerMap.set(task.key, handlers);
+        this.handlerMap.set(task.hash, handlers);
     }
 
-    private pushTask(task: Task<T>) {
+    private pushTask(task: Task) {
         this.taskList.push(task);
     }
 
-    private popTask(): Task<T> {
+    private popTask(): Task {
         const task = this.taskList.pop()!;
         return task;
     }
@@ -72,13 +76,13 @@ abstract class TaskManager<T> {
 
         try {
             const value = await this.execute(task);
-            if (this.cacheManager) {
-                this.cacheManager.set(task.key, value);
+            if (this.cacheStorage) {
+                this.cacheStorage.set(task.hash, value);
             }
-            const handlers = this.handlerMap.get(task.key);
+            const handlers = this.handlerMap.get(task.hash);
             handlers!.forEach((handler) => handler(value));
         } catch (e) {
-            const handlers = this.handlerMap.get(task.key);
+            const handlers = this.handlerMap.get(task.hash);
             handlers!.forEach((handler) => handler(undefined, e));
         }
         this.workingCount -= 1;

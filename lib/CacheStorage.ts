@@ -7,15 +7,16 @@ class CacheManager<T> {
         let cache = this.cacheList.filter((item) => item.key === key)[0];
         if (!cache) {
             cache = new Cache(key, value);
+            this.cacheList.push(cache);
+            this.shrink();
         } else {
             cache.value = value;
         }
-        this.cacheList.push(cache);
-        this.shrink();
     }
     public get(key: string): T | null {
         const cache = this.cacheList.filter((item) => item.key === key)[0];
         if (cache) {
+            cache.visit();
             return cache.value;
         }
         return null;

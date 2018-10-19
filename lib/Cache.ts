@@ -6,13 +6,7 @@ class Cache<T> {
         this.visitCount += 1;
         this.timestamp = Date.now();
     }
-    public get visits() {
-        return this.visitCount;
-    }
-    public get visitTime() {
-        return this.timestamp;
-    }
-
+    
     public get priority() {
         const ONE_VISIT_VALUE_TIME = 60000;
         return this.timestamp + this.visitCount * ONE_VISIT_VALUE_TIME;

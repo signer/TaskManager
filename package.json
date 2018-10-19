@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "task manager",
   "main": "dist/TaskManager.js",
-  "typings": "dist/index.d.ts",
+  "typings": "dist/TaskManager.d.ts",
   "module": "commonjs",
   "scripts": {
     "test": "npm run build && mocha",
