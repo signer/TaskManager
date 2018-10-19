@@ -85,7 +85,7 @@ describe('TaskManager Test', () => {
         var promises = [2, 3, 2, 3, 2, 3, 2, 3].map(num => new SquareTask(num))
             .map(task => taskmanager.addTask(task));
         var begin = Date.now();
-        Promise.all(promises).then(() => {
+        return Promise.all(promises).then(() => {
             var duration = (Date.now() - begin) / 100;
             return Math.round(duration);
         }).should.eventually.equal(Math.round(TASK_DURATION * 2 / 100));
